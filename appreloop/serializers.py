@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import CustomUser
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+from .models import Profile
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -41,3 +42,9 @@ class LoginSerializer(serializers.Serializer):
         data['user'] = user
         return data
 
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['id', 'user', 'bio', 'city', 'state']
+        read_only_fields = ['id', 'user']

@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from .models import Profile
+from .serializers import ProfileSerializer
 
 
 
@@ -65,3 +67,23 @@ class UserDetailsAPI(APIView):
             'email': user.email,
             'role': user.role
         }, status=status.HTTP_200_OK)
+
+
+
+class CreateProfileAPI(generics.CreateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class MyProfileAPI(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        profile, created = Profile.objects.get_or_create(
+            user=self.request.user
+        )
+        return profile

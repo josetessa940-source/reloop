@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'appreloop',
     'rest_framework',
     'rest_framework.authtoken',
-    'profileapp',
+    
 ]
 AUTH_USER_MODEL='appreloop.CustomUser'
 REST_FRAMEWORK = {
