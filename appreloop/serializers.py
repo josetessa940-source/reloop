@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import CustomUser
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import Profile
+from .models import *
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -48,3 +48,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['id', 'user', 'bio', 'city', 'state']
         read_only_fields = ['id', 'user']
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'

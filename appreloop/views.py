@@ -1,14 +1,12 @@
 from rest_framework import generics
-from .serializers import RegisterSerializer
 from rest_framework.permissions import AllowAny
-from .serializers import LoginSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .models import Profile
-from .serializers import ProfileSerializer
+from .models import *
+from .serializers import *
 
 
 
@@ -87,3 +85,14 @@ class MyProfileAPI(generics.RetrieveUpdateAPIView):
             user=self.request.user
         )
         return profile
+
+class CategoryListCreateAPI(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
+
+
+class CategoryDetailAPI(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]

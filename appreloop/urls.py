@@ -7,5 +7,7 @@ urlpatterns = [
     path('logout/', views.LogoutAPI.as_view(), name='logout'),
     path('user-details/', views.UserDetailsAPI.as_view(), name='user-details'),
     path('profile/', views.CreateProfileAPI.as_view(), name='create-profile'),
-    path('profile/me/', views.MyProfileAPI.as_view(), name='my-profile'),   
+    path('profile/me/', views.MyProfileAPI.as_view(), name='my-profile'),
+    path('categories/', views.CategoryListCreateAPI.as_view(), name='category-list-create'),
+    path('categories/<int:pk>/', views.CategoryDetailAPI.as_view(), name='category-detail'),
 ]
