@@ -166,3 +166,15 @@ class SellerVerificationDetailAPI(generics.UpdateAPIView):
             'is_verified': seller.is_verified,
             'status': 'Verified' if seller.is_verified else 'Pending'
         })
+
+class ProductListCreateAPI(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]
+
+
+class ProductDetailAPI(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]
+

@@ -22,8 +22,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
-
-
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -75,8 +73,15 @@ class SellerSerializer(serializers.ModelSerializer):
             'created_at',
         ]
 
+
 class SellerVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
         fields = ['id', 'shop_name', 'is_verified']
         read_only_fields = ['id', 'shop_name']
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at']

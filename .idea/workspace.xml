@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fe952031-1b9e-44b2-bcaf-cfac788b3354" name="Changes" comment="" />
+    <list default="true" id="fe952031-1b9e-44b2-bcaf-cfac788b3354" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/appreloop/migrations/0006_alter_category_id_alter_customuser_id_and_more.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appreloop/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appreloop/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appreloop/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appreloop/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appreloop/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -17,9 +26,12 @@
       </list>
     </option>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
-}]]></component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="3KM7CUf3bWRvEHib7TMsgvZNhWG" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -30,6 +42,8 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Rebasing tessa",
     "last_opened_file_path": "C:/Users/joset/OneDrive/Desktop/reloop/proreloop"
   }
 }]]></component>
