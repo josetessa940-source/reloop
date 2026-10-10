@@ -12,4 +12,6 @@ urlpatterns = [
     path('categories/<int:pk>/', views.CategoryDetailAPI.as_view(), name='category-detail'),
     path('seller/', views.CreateSellerAPI.as_view()),
     path('seller/me/', views.MySellerProfileAPI.as_view()),
+    path('admin/sellers/pending/',views.SellerVerificationAPI.as_view(),name='pending-sellers'),
+    path('admin/sellers/<int:pk>/verify/',views.SellerVerificationDetailAPI.as_view(),name='verify-seller'),
 ]

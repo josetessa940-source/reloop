@@ -131,3 +131,38 @@ class MySellerProfileAPI(generics.RetrieveUpdateAPIView):
             }
         )
         return seller
+
+
+class SellerVerificationAPI(generics.ListAPIView):
+    serializer_class = SellerVerificationSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        return Seller.objects.filter(is_verified=False)
+
+
+class SellerVerificationDetailAPI(generics.UpdateAPIView):
+    queryset = Seller.objects.all()
+    serializer_class = SellerVerificationSerializer
+    permission_classes = [IsAdminUser]
+    http_method_names = ['patch', 'put', 'head', 'options']
+
+    def update(self, request, *args, **kwargs):
+        seller = self.get_object()
+        verified = request.data.get('is_verified')
+
+        if not isinstance(verified, bool):
+            return Response(
+                {'error': 'is_verified must be true or false.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        seller.is_verified = verified
+        seller.save(update_fields=['is_verified'])
+
+        return Response({
+            'message': 'Seller verification updated successfully',
+            'seller_id': seller.id,
+            'is_verified': seller.is_verified,
+            'status': 'Verified' if seller.is_verified else 'Pending'
+        })

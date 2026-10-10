@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from .models import CustomUser
-from rest_framework import serializers
 from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAdminUser
+from rest_framework import generics
 from .models import *
-
+from .serializers import *
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -54,7 +55,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
 
-
 class SellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
@@ -74,3 +74,9 @@ class SellerSerializer(serializers.ModelSerializer):
             'is_verified',
             'created_at',
         ]
+
+class SellerVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seller
+        fields = ['id', 'shop_name', 'is_verified']
+        read_only_fields = ['id', 'shop_name']
