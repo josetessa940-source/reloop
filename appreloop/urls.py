@@ -10,4 +10,6 @@ urlpatterns = [
     path('profile/me/', views.MyProfileAPI.as_view(), name='my-profile'),
     path('categories/', views.CategoryListCreateAPI.as_view(), name='category-list-create'),
     path('categories/<int:pk>/', views.CategoryDetailAPI.as_view(), name='category-detail'),
+    path('seller/', views.CreateSellerAPI.as_view()),
+    path('seller/me/', views.MySellerProfileAPI.as_view()),
 ]

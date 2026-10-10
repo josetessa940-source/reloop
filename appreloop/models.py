@@ -38,3 +38,23 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+
+
+class Seller(models.Model):
+    user = models.OneToOneField(
+        'appreloop.CustomUser',
+        on_delete=models.CASCADE,
+        related_name='seller_profile'
+    )
+    shop_name = models.CharField(max_length=150)
+    shop_description = models.TextField(blank=True)
+    shop_address = models.TextField()
+    shop_phone = models.CharField(max_length=15)
+    is_verified = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.shop_name
+

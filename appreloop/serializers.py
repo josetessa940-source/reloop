@@ -53,3 +53,24 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
+
+class SellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seller
+        fields = [
+            'id',
+            'user',
+            'shop_name',
+            'shop_description',
+            'shop_address',
+            'shop_phone',
+            'is_verified',
+            'created_at',
+        ]
+        read_only_fields = [
+            'id',
+            'user',
+            'is_verified',
+            'created_at',
+        ]

@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from .models import *
 from .serializers import *
 
@@ -96,3 +97,37 @@ class CategoryDetailAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
+
+class CreateSellerAPI(generics.CreateAPIView):
+    serializer_class = SellerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        if self.request.user.role != 'seller':
+            raise PermissionDenied(
+                "Only seller accounts can create a seller profile."
+            )
+
+        serializer.save(user=self.request.user)
+
+
+class MySellerProfileAPI(generics.RetrieveUpdateAPIView):
+    serializer_class = SellerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        if self.request.user.role != 'seller':
+            raise PermissionDenied(
+                "Only seller accounts can access a seller profile."
+            )
+
+        seller, created = Seller.objects.get_or_create(
+            user=self.request.user,
+            defaults={
+                'shop_name': self.request.user.username + "'s Shop",
+                'shop_description': '',
+                'shop_address': '',
+                'shop_phone': '',
+            }
+        )
+        return seller
