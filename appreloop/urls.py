@@ -16,4 +16,7 @@ urlpatterns = [
     path('admin/sellers/<int:pk>/verify/',views.SellerVerificationDetailAPI.as_view(),name='verify-seller'),
     path('products/', views.ProductListCreateAPI.as_view(), name='product-list-create'),
     path('products/<int:pk>/', views.ProductDetailAPI.as_view(), name='product-detail'),
-]
+    path('wishlist/add/', views.WishlistCreateView.as_view(), name='wishlist-add'),
+    path('wishlist/', views.WishlistListView.as_view(), name='wishlist-list'),
+    path('wishlist/delete/<int:pk>/',views. WishlistDeleteView.as_view(), name='wishlist-delete'),
+    ]

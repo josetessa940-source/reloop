@@ -85,3 +85,18 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
         read_only_fields = ['id', 'created_at']
+
+
+class WishlistSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_price = serializers.DecimalField(
+        source='product.price',
+        max_digits=10,
+        decimal_places=2,
+        read_only=True
+    )
+
+    class Meta:
+        model = Wishlist
+        fields = ['id', 'user', 'product', 'product_name', 'product_price', 'created_at']
+        read_only_fields = ['id', 'created_at']

@@ -178,3 +178,23 @@ class ProductDetailAPI(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
 
+
+# Add product to wishlist
+class WishlistCreateView(generics.CreateAPIView):
+    queryset = Wishlist.objects.all()
+    serializer_class = WishlistSerializer
+
+
+# View wishlist
+class WishlistListView(generics.ListAPIView):
+    serializer_class = WishlistSerializer
+
+    def get_queryset(self):
+        user_id = self.request.query_params.get('user')
+        return Wishlist.objects.filter(user_id=user_id)
+
+
+# Remove product from wishlist
+class WishlistDeleteView(generics.DestroyAPIView):
+    queryset = Wishlist.objects.all()
+    serializer_class = WishlistSerializer
