@@ -3,6 +3,7 @@ from .models import CustomUser
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAdminUser
 from rest_framework import generics
+from .models import Review
 from .models import *
 from .serializers import *
 
@@ -100,3 +101,30 @@ class WishlistSerializer(serializers.ModelSerializer):
         model = Wishlist
         fields = ['id', 'user', 'product', 'product_name', 'product_price', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    rating_stars = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = [
+            'id', 'user', 'username', 'product',
+            'rating', 'rating_stars', 'comment',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'id', 'user', 'username',
+            'rating_stars', 'created_at', 'updated_at'
+        ]
+
+    def get_rating_stars(self, obj):
+        return '⭐' * obj.rating
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError(
+                "Rating must be between 1 and 5."
+            )
+        return value

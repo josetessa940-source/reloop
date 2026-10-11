@@ -198,3 +198,49 @@ class WishlistListView(generics.ListAPIView):
 class WishlistDeleteView(generics.DestroyAPIView):
     queryset = Wishlist.objects.all()
     serializer_class = WishlistSerializer
+
+class ReviewListCreateAPI(generics.ListCreateAPIView):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(
+            product_id=self.request.query_params.get('product')
+        ) if self.request.query_params.get('product') else Review.objects.all()
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        existing_review = Review.objects.filter(
+            user=request.user,
+            product_id=request.data.get('product')
+        ).exists()
+
+        if existing_review:
+            return Response(
+                {'error': 'You have already reviewed this product.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return super().create(request, *args, **kwargs)
+
+
+class ReviewDetailAPI(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        review = super().get_object()
+
+        if review.user != self.request.user and not self.request.user.is_staff:
+            raise PermissionDenied(
+                "You can only manage your own reviews."
+            )
+
+        return review
