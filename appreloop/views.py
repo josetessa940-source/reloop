@@ -198,3 +198,27 @@ class WishlistListView(generics.ListAPIView):
 class WishlistDeleteView(generics.DestroyAPIView):
     queryset = Wishlist.objects.all()
     serializer_class = WishlistSerializer
+
+
+# Create and View Offers
+class OfferListCreateView(generics.ListCreateAPIView):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
+
+
+# Accept Offer
+class OfferAcceptView(generics.UpdateAPIView):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
+
+    def perform_update(self, serializer):
+        serializer.save(status='accepted')
+
+
+# Reject Offer
+class OfferRejectView(generics.UpdateAPIView):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
+
+    def perform_update(self, serializer):
+        serializer.save(status='rejected')

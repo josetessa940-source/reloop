@@ -100,3 +100,29 @@ class WishlistSerializer(serializers.ModelSerializer):
         model = Wishlist
         fields = ['id', 'user', 'product', 'product_name', 'product_price', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class OfferSerializer(serializers.ModelSerializer):
+    buyer_name = serializers.CharField(
+        source='buyer.username',
+        read_only=True
+    )
+
+    product_name = serializers.CharField(
+        source='product.name',
+        read_only=True
+    )
+
+    class Meta:
+        model = Offer
+        fields = [
+            'id',
+            'buyer',
+            'buyer_name',
+            'product',
+            'product_name',
+            'offered_price',
+            'status',
+            'created_at'
+        ]
+        read_only_fields = ['id', 'status', 'created_at']
