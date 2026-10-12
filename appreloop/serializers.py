@@ -121,7 +121,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         ]
 
     def get_rating_stars(self, obj):
-        return '⭐' * obj.rating
+        return '?' * obj.rating + '?' * (5 - obj.rating)
 
     def validate_rating(self, value):
         if value < 1 or value > 5:
