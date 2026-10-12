@@ -101,36 +101,17 @@ class Wishlist(models.Model):
     def __str__(self):
         return self.user.username + " - " + self.product.name
 
-
-<<<<<<< HEAD
 class Review(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='reviews'
-=======
-
-class Offer(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
-    ]
-
-    buyer = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='offers'
->>>>>>> 57c2122e97b70e67af4ef9d1edc4a260349be0d5
     )
-
     product = models.ForeignKey(
         Product,
-<<<<<<< HEAD
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-
     rating = models.PositiveSmallIntegerField()
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -141,25 +122,37 @@ class Offer(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name} ({self.rating}/5)"
-=======
-        on_delete=models.CASCADE
-    )
+        return f'{self.user.username} - {self.product.name} ({self.rating}/5)'
+    
 
+
+class Offer(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+
+    buyer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='offers'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='offers'
+    )
     offered_price = models.DecimalField(
         max_digits=10,
         decimal_places=2
     )
-
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
         default='pending'
     )
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.buyer.username} - {self.product.name}"
-
->>>>>>> 57c2122e97b70e67af4ef9d1edc4a260349be0d5
+        return f'{self.buyer.username} - {self.product.name}'

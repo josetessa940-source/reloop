@@ -129,7 +129,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                 "Rating must be between 1 and 5."
             )
         return value
-=======
+
 class OfferSerializer(serializers.ModelSerializer):
     buyer_name = serializers.CharField(
         source='buyer.username',

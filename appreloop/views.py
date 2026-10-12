@@ -199,7 +199,7 @@ class WishlistDeleteView(generics.DestroyAPIView):
     queryset = Wishlist.objects.all()
     serializer_class = WishlistSerializer
 
-<<<<<<< HEAD
+
 class ReviewListCreateAPI(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
 
@@ -245,7 +245,6 @@ class ReviewDetailAPI(generics.RetrieveUpdateDestroyAPIView):
             )
 
         return review
-=======
 
 # Create and View Offers
 class OfferListCreateView(generics.ListCreateAPIView):
@@ -269,4 +268,4 @@ class OfferRejectView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.save(status='rejected')
->>>>>>> 57c2122e97b70e67af4ef9d1edc4a260349be0d5
+
