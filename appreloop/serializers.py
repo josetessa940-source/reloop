@@ -128,3 +128,22 @@ class ReviewSerializer(serializers.ModelSerializer):
                 "Rating must be between 1 and 5."
             )
         return value
+
+class OfferSerializer(serializers.ModelSerializer):
+    buyer_name = serializers.CharField(
+        source='buyer.username',read_only=True)
+    product_name = serializers.CharField(
+        source='product.name',read_only=True)
+    class Meta:
+        model = Offer
+        fields = [
+            'id',
+            'buyer',
+            'buyer_name',
+            'product',
+            'product_name',
+            'offered_price',
+            'status',
+            'created_at'
+        ]
+        read_only_fields = ['id', 'status', 'created_at']

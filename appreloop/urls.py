@@ -19,6 +19,9 @@ urlpatterns = [
     path('wishlist/add/', views.WishlistCreateView.as_view(), name='wishlist-add'),
     path('wishlist/', views.WishlistListView.as_view(), name='wishlist-list'),
     path('wishlist/delete/<int:pk>/',views. WishlistDeleteView.as_view(), name='wishlist-delete'),
-    path('reviews/',views.ReviewListCreateAPI.as_view(),name='review-list-create'),
-    path('reviews/<int:pk>/',views.ReviewDetailAPI.as_view(),name='review-detail'),
+    path('reviews/', views.ReviewListCreateAPI.as_view(), name='review-list-create'),
+    path('reviews/<int:pk>/', views.ReviewDetailAPI.as_view(), name='review-detail'),
+    path('offers/', views.OfferListCreateView.as_view(), name='offer-list-create'),
+    path('offers/<int:pk>/accept/', views.OfferAcceptView.as_view(), name='offer-accept'),
+    path('offers/<int:pk>/reject/', views.OfferRejectView.as_view(), name='offer-reject'),
     ]

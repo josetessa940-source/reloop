@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from .models import *
 from .serializers import *
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
 
@@ -202,45 +203,106 @@ class WishlistDeleteView(generics.DestroyAPIView):
 class ReviewListCreateAPI(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
 
-    def get_queryset(self):
-        return Review.objects.filter(
-            product_id=self.request.query_params.get('product')
-        ) if self.request.query_params.get('product') else Review.objects.all()
+def get_queryset(self):
+    return Review.objects.filter(
+        product_id=self.request.query_params.get('product')
+    ) if self.request.query_params.get('product') else Review.objects.all()
 
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]
-        return [AllowAny()]
+def get_permissions(self):
+    if self.request.method == 'POST':
+        return [IsAuthenticated()]
+    return [AllowAny()]
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+def perform_create(self, serializer):
+    serializer.save(user=self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        existing_review = Review.objects.filter(
-            user=request.user,
-            product_id=request.data.get('product')
-        ).exists()
+def create(self, request, *args, **kwargs):
+    existing_review = Review.objects.filter(
+        user=request.user,
+        product_id=request.data.get('product')
+    ).exists()
 
-        if existing_review:
-            return Response(
-                {'error': 'You have already reviewed this product.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    if existing_review:
+        return Response(
+            {'error': 'You have already reviewed this product.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-        return super().create(request, *args, **kwargs)
+    return super().create(request, *args, **kwargs)
 
+class ReviewListCreateAPI(generics.ListCreateAPIView):
+    serializer_class = ReviewSerializer
+
+def get_queryset(self):
+    product_id = self.request.query_params.get('product')
+
+    if product_id:
+        return Review.objects.filter(product_id=product_id)
+
+    return Review.objects.all()
+
+def get_permissions(self):
+    if self.request.method == 'POST':
+        return [IsAuthenticated()]
+
+    return [AllowAny()]
+
+def perform_create(self, serializer):
+    serializer.save(user=self.request.user)
+
+def create(self, request, *args, **kwargs):
+    existing_review = Review.objects.filter(
+        user=request.user,
+        product_id=request.data.get('product')
+    ).exists()
+
+    if existing_review:
+        return Response(
+            {'error': 'You have already reviewed this product.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    return super().create(request, *args, **kwargs)
 
 class ReviewDetailAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        review = super().get_object()
+def get_object(self):
+    review = super().get_object()
 
-        if review.user != self.request.user and not self.request.user.is_staff:
-            raise PermissionDenied(
-                "You can only manage your own reviews."
-            )
+    if review.user != self.request.user and not self.request.user.is_staff:
+        raise PermissionDenied(
+            "You can only manage your own reviews."
+        )
 
-        return review
+    return review
+
+
+class OfferListCreateView(generics.ListCreateAPIView):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
+    permission_classes = [IsAuthenticated]
+
+
+# Accept Offer
+class OfferAcceptView(generics.UpdateAPIView):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['patch', 'head', 'options']
+
+    def perform_update(self, serializer):
+        serializer.save(status='accepted')
+
+
+# Reject Offer
+class OfferRejectView(generics.UpdateAPIView):
+    queryset = Offer.objects.all()
+    serializer_class = OfferSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['patch', 'head', 'options']
+
+    def perform_update(self, serializer):
+        serializer.save(status='rejected')
