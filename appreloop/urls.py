@@ -25,4 +25,5 @@ urlpatterns = [
     path('offers/', views.OfferListCreateView.as_view(), name='offer-list-create'),
     path('offers/<int:pk>/accept/', views.OfferAcceptView.as_view(), name='offer-accept'),
     path('offers/<int:pk>/reject/', views.OfferRejectView.as_view(), name='offer-reject'),
+    path('orders/', views.order_list_create, name='order-list-create'),
 ]

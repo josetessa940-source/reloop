@@ -4,8 +4,14 @@ from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAdminUser
 from rest_framework import generics
 from .models import Review
+from .models import Order, OrderItem, Product
+from rest_framework.response import Response
+from django.db import transaction
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from .models import *
-from .serializers import *
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -155,3 +161,134 @@ class OfferSerializer(serializers.ModelSerializer):
             'created_at'
         ]
         read_only_fields = ['id', 'status', 'created_at']
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    subtotal = serializers.ReadOnlyField()
+
+    class Meta:
+        model = OrderItem
+        fields = [
+            'id',
+            'product',
+            'quantity',
+            'unit_price',
+            'subtotal',
+        ]
+        read_only_fields = ['unit_price', 'subtotal']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id',
+            'buyer',
+            'items',
+            'total_amount',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'buyer',
+            'total_amount',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def order_list_create(request):
+    if request.method == 'GET':
+        orders = Order.objects.filter(
+            buyer=request.user
+        ).prefetch_related('items__product')
+
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+    items_data = request.data.get('items', [])
+
+    if not isinstance(items_data, list) or not items_data:
+        return Response(
+            {'error': 'At least one item is required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        with transaction.atomic():
+            total = 0
+            validated_items = []
+
+            for item in items_data:
+                if not isinstance(item, dict):
+                    return Response(
+                        {'error': 'Each item must be an object.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                product_id = item.get('product')
+                quantity = item.get('quantity')
+
+                if (
+                    not isinstance(quantity, int)
+                    or isinstance(quantity, bool)
+                    or quantity <= 0
+                ):
+                    return Response(
+                        {'error': 'Quantity must be a positive integer.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                product = Product.objects.select_for_update().get(
+                    pk=product_id
+                )
+
+                if product.stock < quantity:
+                    return Response(
+                        {'error': f'Insufficient stock for {product.name}.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                total += product.price * quantity
+                validated_items.append((product, quantity))
+
+            order = Order.objects.create(
+                buyer=request.user,
+                total_amount=total
+            )
+
+            for product, quantity in validated_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=quantity,
+                    unit_price=product.price
+                )
+
+                product.stock -= quantity
+                product.save(update_fields=['stock'])
+
+        serializer = OrderSerializer(order)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    except Product.DoesNotExist:
+        return Response(
+            {'error': 'One or more products were not found.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    except (ValueError, TypeError):
+        return Response(
+            {'error': 'Invalid product ID or request data.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )

@@ -1,14 +1,15 @@
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from decimal import Decimal, InvalidOperation
+from django.db import transaction
+
+from rest_framework import generics, status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import (AllowAny,IsAuthenticated,IsAdminUser,)
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
 from .models import *
 from .serializers import *
-
 
 
 class RegisterAPI(generics.CreateAPIView):
@@ -269,3 +270,115 @@ class OfferRejectView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         serializer.save(status='rejected')
 
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def order_list_create(request):
+
+    if request.method == 'GET':
+        orders = (
+            Order.objects
+            .filter(buyer=request.user)
+            .prefetch_related('items__product')
+        )
+
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+   
+    items_data = request.data.get('items', [])
+
+    if not isinstance(items_data, list) or not items_data:
+        return Response(
+            {'error': 'At least one item is required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        with transaction.atomic():
+            total = Decimal('0.00')
+            validated_items = []
+            quantities = {}
+
+            
+            for item in items_data:
+                if not isinstance(item, dict):
+                    return Response(
+                        {'error': 'Each item must be an object.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                product_id = item.get('product')
+                quantity = item.get('quantity')
+
+                if product_id is None:
+                    return Response(
+                        {'error': 'Product ID is required.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if (
+                    not isinstance(quantity, int)
+                    or isinstance(quantity, bool)
+                    or quantity <= 0
+                ):
+                    return Response(
+                        {'error': 'Quantity must be a positive integer.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                quantities[product_id] = (
+                    quantities.get(product_id, 0) + quantity
+                )
+
+           
+            for product_id, quantity in quantities.items():
+                product = Product.objects.get(pk=product_id)
+
+                if product.stock < quantity:
+                    return Response(
+                        {
+                            'error':
+                            f'Insufficient stock for {product.name}.'
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                total += product.price * quantity
+                validated_items.append((product, quantity))
+
+            # Order create cheyyunnu
+            order = Order.objects.create(
+                buyer=request.user,
+                total_amount=total
+            )
+
+            # Order items create cheyyukayum stock kurakkukayum cheyyunnu
+            for product, quantity in validated_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=quantity,
+                    unit_price=product.price
+                )
+
+                product.stock -= quantity
+                product.save(update_fields=['stock'])
+
+        serializer = OrderSerializer(order)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    except Product.DoesNotExist:
+        return Response(
+            {'error': 'One or more products were not found.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    except (ValueError, TypeError, InvalidOperation):
+        return Response(
+            {'error': 'Invalid product ID or request data.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
