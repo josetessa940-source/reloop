@@ -26,4 +26,7 @@ urlpatterns = [
     path('offers/<int:pk>/accept/', views.OfferAcceptView.as_view(), name='offer-accept'),
     path('offers/<int:pk>/reject/', views.OfferRejectView.as_view(), name='offer-reject'),
     path('orders/', views.order_list_create, name='order-list-create'),
+    path('payments/', views.payment_list_create, name='payment-list-create'),
+    path('payments/<int:pk>/', views.payment_detail, name='payment-detail'),
+    path('payments/<int:pk>/status/',views.payment_status_update,name='payment-status-update'),
 ]

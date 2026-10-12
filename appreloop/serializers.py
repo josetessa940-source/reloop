@@ -292,3 +292,27 @@ def order_list_create(request):
             {'error': 'Invalid product ID or request data.'},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        source='user.username',
+        read_only=True
+    )
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'user', 'username', 'amount',
+            'payment_method', 'payment_status',
+            'transaction_id', 'created_at'
+        ]
+        read_only_fields = [
+            'id', 'user', 'username', 'payment_status',
+            'transaction_id', 'created_at'
+        ]
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than zero.")
+        return value
