@@ -8,6 +8,9 @@ from rest_framework.permissions import (AllowAny,IsAuthenticated,IsAdminUser,)
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from .models import DonationRequest, Product
+from .serializers import DonationRequestSerializer
+from django.shortcuts import get_object_or_404
 from .models import *
 from .serializers import *
 
@@ -352,7 +355,6 @@ def order_list_create(request):
                 total_amount=total
             )
 
-            # Order items create cheyyukayum stock kurakkukayum cheyyunnu
             for product, quantity in validated_items:
                 OrderItem.objects.create(
                     order=order,
@@ -382,3 +384,122 @@ def order_list_create(request):
             {'error': 'Invalid product ID or request data.'},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+# Create Donation Request and View My Donations
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def donation_list_create(request):
+
+    if request.method == 'GET':
+        donations = DonationRequest.objects.filter(
+            donor=request.user
+        ).select_related('product').order_by('-created_at')
+
+        serializer = DonationRequestSerializer(donations, many=True)
+        return Response(serializer.data)
+
+    product_id = request.data.get('product')
+
+    if not product_id:
+        return Response(
+            {'error': 'Product ID is required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    product = get_object_or_404(Product, id=product_id)
+
+    # Prevent duplicate active requests for the same product
+    existing = DonationRequest.objects.filter(
+        donor=request.user,
+        product=product,
+        status__in=['pending', 'approved']
+    ).exists()
+
+    if existing:
+        return Response(
+            {'error': 'An active donation request already exists for this product.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    donation = DonationRequest.objects.create(
+        donor=request.user,
+        product=product,
+        message=request.data.get('message', '')
+    )
+
+    serializer = DonationRequestSerializer(donation)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def donation_detail(request, donation_id):
+    donation = get_object_or_404(
+        DonationRequest.objects.select_related('product', 'donor'),
+        id=donation_id,
+        donor=request.user
+    )
+
+    serializer = DonationRequestSerializer(donation)
+    return Response(serializer.data)
+
+@api_view(['PATCH'])
+@permission_classes([IsAdminUser])
+def update_donation_status(request, donation_id):
+    donation = get_object_or_404(
+        DonationRequest,
+        id=donation_id
+    )
+
+    new_status = request.data.get('status')
+
+    allowed_statuses = ['approved', 'rejected', 'completed']
+
+    if new_status not in allowed_statuses:
+        return Response(
+            {
+                'error': 'Invalid status.',
+                'allowed_statuses': allowed_statuses
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if donation.status in ['cancelled', 'completed', 'rejected']:
+        return Response(
+            {'error': 'This donation request can no longer be updated.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    donation.status = new_status
+    donation.save(update_fields=['status', 'updated_at'])
+
+    return Response({
+        'message': 'Donation status updated successfully.',
+        'donation_id': donation.id,
+        'status': donation.status
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_donation(request, donation_id):
+    donation = get_object_or_404(
+        DonationRequest,
+        id=donation_id,
+        donor=request.user
+    )
+
+    if donation.status != 'pending':
+        return Response(
+            {'error': 'Only pending donation requests can be cancelled.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    donation.status = 'cancelled'
+    donation.save(update_fields=['status', 'updated_at'])
+
+    return Response({
+        'message': 'Donation request cancelled successfully.',
+        'donation_id': donation.id,
+        'status': donation.status
+    })

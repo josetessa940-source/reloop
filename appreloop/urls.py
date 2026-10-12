@@ -26,4 +26,9 @@ urlpatterns = [
     path('offers/<int:pk>/accept/', views.OfferAcceptView.as_view(), name='offer-accept'),
     path('offers/<int:pk>/reject/', views.OfferRejectView.as_view(), name='offer-reject'),
     path('orders/', views.order_list_create, name='order-list-create'),
+    path('donations/', views.donation_list_create, name='donation-list-create'),
+    path('donations/<int:donation_id>/', views.donation_detail, name='donation-detail'),
+    path('donations/<int:donation_id>/status/',views.update_donation_status,name='update-donation-status'),
+    path('donations/<int:donation_id>/cancel/',views.cancel_donation,name='cancel-donation'),
 ]
+

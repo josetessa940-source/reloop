@@ -10,6 +10,7 @@ from django.db import transaction
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from .models import DonationRequest
 from .models import *
 
 
@@ -292,3 +293,35 @@ def order_list_create(request):
             {'error': 'Invalid product ID or request data.'},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class DonationRequestSerializer(serializers.ModelSerializer):
+    donor_username = serializers.CharField(
+        source='donor.username',
+        read_only=True
+    )
+    product_name = serializers.CharField(
+        source='product.name',
+        read_only=True
+    )
+
+    class Meta:
+        model = DonationRequest
+        fields = [
+            'id',
+            'donor',
+            'donor_username',
+            'product',
+            'product_name',
+            'message',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'donor',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
