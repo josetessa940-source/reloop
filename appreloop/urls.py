@@ -30,5 +30,8 @@ urlpatterns = [
     path('donations/<int:donation_id>/', views.donation_detail, name='donation-detail'),
     path('donations/<int:donation_id>/status/',views.update_donation_status,name='update-donation-status'),
     path('donations/<int:donation_id>/cancel/',views.cancel_donation,name='cancel-donation'),
+    path('payments/', views.payment_list_create, name='payment-list-create'),
+    path('payments/<int:pk>/', views.payment_detail, name='payment-detail'),
+    path('payments/<int:pk>/status/', views.payment_status_update, name='payment-status-update'),
 ]
 

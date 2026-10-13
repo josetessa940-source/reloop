@@ -503,3 +503,76 @@ def cancel_donation(request, donation_id):
         'donation_id': donation.id,
         'status': donation.status
     })
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def payment_list_create(request):
+    if request.method == 'GET':
+        payments = Payment.objects.filter(
+            user=request.user
+        ).order_by('-created_at')
+
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data)
+
+    serializer = PaymentSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def payment_detail(request, pk):
+    try:
+        payment = Payment.objects.get(
+            pk=pk,
+            user=request.user
+        )
+    except Payment.DoesNotExist:
+        return Response(
+            {'error': 'Payment not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = PaymentSerializer(payment)
+    return Response(serializer.data)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def payment_status_update(request, pk):
+    try:
+        payment = Payment.objects.get(
+            pk=pk,
+            user=request.user
+        )
+    except Payment.DoesNotExist:
+        return Response(
+            {'error': 'Payment not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    new_status = request.data.get('payment_status')
+
+    if new_status not in ['Pending', 'Success', 'Failed']:
+        return Response(
+            {'error': 'Invalid payment status'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    payment.payment_status = new_status
+    payment.save()
+
+    serializer = PaymentSerializer(payment)
+    return Response(serializer.data)
