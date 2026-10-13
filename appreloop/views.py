@@ -1,17 +1,18 @@
+
 from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
+from django.shortcuts import get_object_or_404
+
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import (AllowAny,IsAuthenticated,IsAdminUser,)
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import DonationRequest, Product
-from .serializers import DonationRequestSerializer
-from django.shortcuts import get_object_or_404
-from .models import RepairRequest
-from .serializers import RepairRequestSerializer
+from .models import (DonationRequest,RepairRequest,Pickup,Order,Product,)
+from .serializers import (DonationRequestSerializer,RepairRequestSerializer,PickupSerializer,)
 from .models import *
 from .serializers import *
 
@@ -579,7 +580,7 @@ def payment_status_update(request, pk):
     return Response(serializer.data)
 
 
-# Create and View Exchange Requests
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def exchange_request_list_create(request):
@@ -860,3 +861,102 @@ def recycle_request_update_status(request, pk):
     serializer = RecycleRequestSerializer(recycle_request)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def pickup_list_create(request):
+    if request.method == 'GET':
+        pickups = Pickup.objects.filter(user=request.user)
+        serializer = PickupSerializer(pickups, many=True)
+        return Response(serializer.data)
+
+    serializer = PickupSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def pickup_detail(request, pk):
+    try:
+        pickup = Pickup.objects.get(pk=pk, user=request.user)
+    except Pickup.DoesNotExist:
+        return Response(
+            {'error': 'Pickup not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    if request.method == 'GET':
+        serializer = PickupSerializer(pickup)
+        return Response(serializer.data)
+
+    if request.method in ['PUT', 'PATCH']:
+        serializer = PickupSerializer(
+            pickup,
+            data=request.data,
+            partial=(request.method == 'PATCH')
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    pickup.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def pickup_status_update(request, pk):
+    try:
+        pickup = Pickup.objects.get(pk=pk, user=request.user)
+    except Pickup.DoesNotExist:
+        return Response(
+            {'error': 'Pickup not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    new_status = request.data.get('status')
+
+    if not new_status:
+        return Response(
+            {'error': 'Status is required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    allowed_statuses = [
+        choice[0] for choice in Pickup._meta.get_field('status').choices
+    ]
+
+    if new_status not in allowed_statuses:
+        return Response(
+            {'error': 'Invalid status', 'allowed_statuses': allowed_statuses},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    pickup.status = new_status
+    pickup.save(update_fields=['status'])
+
+    return Response({
+        'message': 'Pickup status updated successfully',
+        'id': pickup.pk,
+        'status': pickup.status
+    })

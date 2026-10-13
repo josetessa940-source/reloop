@@ -394,3 +394,43 @@ class RecycleRequest(models.Model):
 
     def __str__(self):
         return f"Recycle Request #{self.id} - {self.status}"
+
+
+class Pickup(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Scheduled', 'Scheduled'),
+        ('Picked Up', 'Picked Up'),
+        ('Completed', 'Completed'),
+        ('Cancelled', 'Cancelled'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='pickups'
+    )
+
+    order = models.ForeignKey(
+        'Order',
+        on_delete=models.CASCADE,
+        related_name='pickups'
+    )
+
+    pickup_date = models.DateField()
+    pickup_time = models.TimeField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='Pending'
+    )
+
+    address = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Pickup #{self.id} - {self.status}"

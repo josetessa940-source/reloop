@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import DonationRequest
 from .models import RepairRequest
+from .models import Pickup
 from .models import *
 
 
@@ -295,6 +296,28 @@ def order_list_create(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+class RecycleRequestSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = RecycleRequest
+        fields = [
+            'id',
+            'user',
+            'username',
+            'item_description',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'user',
+            'username',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
 
 class DonationRequestSerializer(serializers.ModelSerializer):
     donor_username = serializers.CharField(
@@ -403,6 +426,7 @@ class ExchangeRequestSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
 
+
 class RepairRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = RepairRequest
@@ -430,26 +454,24 @@ class RepairRequestSerializer(serializers.ModelSerializer):
             )
         return value
 
-
-
-class RecycleRequestSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-
+class PickupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RecycleRequest
+        model = Pickup
         fields = [
             'id',
             'user',
-            'username',
-            'item_description',
+            'order',
+            'pickup_date',
+            'pickup_time',
             'status',
+            'address',
+            'notes',
             'created_at',
             'updated_at',
         ]
         read_only_fields = [
             'id',
             'user',
-            'username',
             'status',
             'created_at',
             'updated_at',

@@ -41,5 +41,8 @@ urlpatterns = [
     path('repair-requests/<int:pk>/status/',views.repair_request_status_update,name='repair-request-status-update'),
     path('recycle-requests/',views.recycle_request_list_create,name='recycle-request-list-create'),
     path('recycle-requests/<int:pk>/status/',views.recycle_request_update_status,name='recycle-request-update-status'),
+    path('pickups/', views.pickup_list_create, name='pickup-list-create'),
+    path('pickups/<int:pk>/', views.pickup_detail, name='pickup-detail'),
+    path('pickups/<int:pk>/status/', views.pickup_status_update, name='pickup-status-update'),
 ]
 
