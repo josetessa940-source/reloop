@@ -328,3 +328,40 @@ class ExchangeRequest(models.Model):
 
     def __str__(self):
         return f"Exchange Request {self.id} - {self.status}"
+
+
+
+class RepairRequest(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Accepted', 'Accepted'),
+        ('In Progress', 'In Progress'),
+        ('Completed', 'Completed'),
+        ('Rejected', 'Rejected'),
+    ]
+
+    user = models.ForeignKey(
+        'CustomUser',
+        on_delete=models.CASCADE,
+        related_name='repair_requests'
+    )
+
+    product = models.ForeignKey(
+        'Product',
+        on_delete=models.CASCADE,
+        related_name='repair_requests'
+    )
+
+    issue_description = models.TextField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='Pending'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Repair Request #{self.id} - {self.status}"

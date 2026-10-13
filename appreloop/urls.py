@@ -36,5 +36,9 @@ urlpatterns = [
     path('exchange-requests/',views.exchange_request_list_create,name='exchange-request-list-create'),
     path('exchange-requests/<int:pk>/status/',views.exchange_request_update_status,name='exchange-request-update-status'),
     path('exchange-requests/<int:pk>/complete/',views.exchange_request_complete,name='exchange-request-complete'),
+    path('repair-requests/',views.repair_request_list_create,name='repair-request-list-create'),
+    path('repair-requests/<int:pk>/',views.repair_request_detail,name='repair-request-detail'),
+    path('repair-requests/<int:pk>/status/',views.repair_request_status_update,name='repair-request-status-update'),
+
 ]
 

@@ -1,6 +1,5 @@
 from decimal import Decimal, InvalidOperation
 from django.db import transaction
-
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
@@ -11,6 +10,8 @@ from rest_framework.views import APIView
 from .models import DonationRequest, Product
 from .serializers import DonationRequestSerializer
 from django.shortcuts import get_object_or_404
+from .models import RepairRequest
+from .serializers import RepairRequestSerializer
 from .models import *
 from .serializers import *
 
@@ -725,3 +726,73 @@ def exchange_request_complete(request, pk):
         'request_id': exchange_request.id,
         'status': exchange_request.status
     })
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def repair_request_list_create(request):
+
+    if request.method == 'GET':
+        requests = RepairRequest.objects.filter(
+            user=request.user
+        ).order_by('-created_at')
+
+        serializer = RepairRequestSerializer(requests, many=True)
+        return Response(serializer.data)
+
+    serializer = RepairRequestSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def repair_request_detail(request, pk):
+    repair = get_object_or_404(
+        RepairRequest,
+        pk=pk,
+        user=request.user
+    )
+
+    serializer = RepairRequestSerializer(repair)
+    return Response(serializer.data)
+
+
+# 3. Update request status
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def repair_request_status_update(request, pk):
+
+    if not (request.user.is_staff or request.user.is_superuser):
+        return Response(
+            {'error': 'Only staff/admin can update repair status.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    repair = get_object_or_404(RepairRequest, pk=pk)
+
+    new_status = request.data.get('status')
+    allowed_statuses = [
+        choice[0] for choice in RepairRequest.STATUS_CHOICES
+    ]
+
+    if new_status not in allowed_statuses:
+        return Response(
+            {'error': 'Invalid repair status.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    repair.status = new_status
+    repair.save()
+
+    serializer = RepairRequestSerializer(repair)
+    return Response(serializer.data)

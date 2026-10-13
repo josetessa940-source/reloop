@@ -11,6 +11,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import DonationRequest
+from .models import RepairRequest
 from .models import *
 
 
@@ -401,3 +402,30 @@ class ExchangeRequestSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
+
+class RepairRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RepairRequest
+        fields = [
+            'id',
+            'user',
+            'product',
+            'issue_description',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'user',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+
+    def validate_issue_description(self, value):
+        if not value.strip():
+            raise serializers.ValidationError(
+                "Issue description cannot be empty."
+            )
+        return value
