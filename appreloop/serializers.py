@@ -361,3 +361,43 @@ class PaymentSerializer(serializers.ModelSerializer):
                 "Amount must be greater than zero."
             )
         return value
+
+
+class ExchangeRequestSerializer(serializers.ModelSerializer):
+    requester_name = serializers.CharField(
+        source='requester.username',
+        read_only=True
+    )
+
+    product_name = serializers.CharField(
+        source='product.name',
+        read_only=True
+    )
+
+    offered_product_name = serializers.CharField(
+        source='offered_product.name',
+        read_only=True
+    )
+
+    class Meta:
+        model = ExchangeRequest
+        fields = [
+            'id',
+            'requester',
+            'requester_name',
+            'product',
+            'product_name',
+            'offered_product',
+            'offered_product_name',
+            'message',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'requester',
+            'status',
+            'created_at',
+            'updated_at',
+        ]

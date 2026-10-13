@@ -33,5 +33,8 @@ urlpatterns = [
     path('payments/', views.payment_list_create, name='payment-list-create'),
     path('payments/<int:pk>/', views.payment_detail, name='payment-detail'),
     path('payments/<int:pk>/status/', views.payment_status_update, name='payment-status-update'),
+    path('exchange-requests/',views.exchange_request_list_create,name='exchange-request-list-create'),
+    path('exchange-requests/<int:pk>/status/',views.exchange_request_update_status,name='exchange-request-update-status'),
+    path('exchange-requests/<int:pk>/complete/',views.exchange_request_complete,name='exchange-request-complete'),
 ]
 

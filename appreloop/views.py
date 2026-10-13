@@ -576,3 +576,152 @@ def payment_status_update(request, pk):
 
     serializer = PaymentSerializer(payment)
     return Response(serializer.data)
+
+
+# Create and View Exchange Requests
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def exchange_request_list_create(request):
+
+    if request.method == 'GET':
+        requests = ExchangeRequest.objects.filter(
+            models.Q(requester=request.user) |
+            models.Q(product__seller__user=request.user)
+        ).select_related(
+            'requester', 'product', 'offered_product'
+        ).order_by('-created_at')
+
+        serializer = ExchangeRequestSerializer(requests, many=True)
+        return Response(serializer.data)
+
+    product_id = request.data.get('product')
+    offered_product_id = request.data.get('offered_product')
+
+    if not product_id or not offered_product_id:
+        return Response(
+            {'error': 'Both product and offered_product are required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    product = get_object_or_404(Product, id=product_id)
+    offered_product = get_object_or_404(Product, id=offered_product_id)
+
+    if product.id == offered_product.id:
+        return Response(
+            {'error': 'You cannot exchange a product with itself.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if offered_product.seller.user != request.user:
+        return Response(
+            {'error': 'You can only offer your own product.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    if product.seller.user == request.user:
+        return Response(
+            {'error': 'You cannot send an exchange request for your own product.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    existing = ExchangeRequest.objects.filter(
+        requester=request.user,
+        product=product,
+        offered_product=offered_product,
+        status='pending'
+    ).exists()
+
+    if existing:
+        return Response(
+            {'error': 'An exchange request is already pending.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    exchange_request = ExchangeRequest.objects.create(
+        requester=request.user,
+        product=product,
+        offered_product=offered_product,
+        message=request.data.get('message', '')
+    )
+
+    serializer = ExchangeRequestSerializer(exchange_request)
+
+    return Response(
+        serializer.data,
+        status=status.HTTP_201_CREATED
+    )
+
+
+# Accept or Reject Exchange Request
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def exchange_request_update_status(request, pk):
+
+    exchange_request = get_object_or_404(
+        ExchangeRequest,
+        pk=pk
+    )
+
+    if exchange_request.product.seller.user != request.user:
+        return Response(
+            {'error': 'Only the product owner can update this request.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    new_status = request.data.get('status')
+
+    if new_status not in ['accepted', 'rejected']:
+        return Response(
+            {'error': 'Status must be accepted or rejected.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if exchange_request.status != 'pending':
+        return Response(
+            {'error': 'Only pending requests can be accepted or rejected.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    exchange_request.status = new_status
+    exchange_request.save()
+
+    return Response({
+        'message': 'Exchange request status updated successfully.',
+        'request_id': exchange_request.id,
+        'status': exchange_request.status
+    })
+
+
+# Mark Exchange Request as Completed
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def exchange_request_complete(request, pk):
+
+    exchange_request = get_object_or_404(
+        ExchangeRequest,
+        pk=pk
+    )
+
+    if request.user not in [
+        exchange_request.requester,
+        exchange_request.product.seller.user
+    ]:
+        return Response(
+            {'error': 'You are not allowed to update this request.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    if exchange_request.status != 'accepted':
+        return Response(
+            {'error': 'Only accepted requests can be completed.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    exchange_request.status = 'completed'
+    exchange_request.save()
+
+    return Response({
+        'message': 'Exchange completed successfully.',
+        'request_id': exchange_request.id,
+        'status': exchange_request.status
+    })

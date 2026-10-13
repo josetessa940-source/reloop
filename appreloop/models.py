@@ -286,3 +286,45 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.amount}"
+
+
+class ExchangeRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    requester = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_exchange_requests'
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='exchange_requests'
+    )
+
+    offered_product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='offered_in_exchange_requests'
+    )
+
+    message = models.TextField(blank=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Exchange Request {self.id} - {self.status}"
