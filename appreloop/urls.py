@@ -39,6 +39,7 @@ urlpatterns = [
     path('repair-requests/',views.repair_request_list_create,name='repair-request-list-create'),
     path('repair-requests/<int:pk>/',views.repair_request_detail,name='repair-request-detail'),
     path('repair-requests/<int:pk>/status/',views.repair_request_status_update,name='repair-request-status-update'),
-
+    path('recycle-requests/',views.recycle_request_list_create,name='recycle-request-list-create'),
+    path('recycle-requests/<int:pk>/status/',views.recycle_request_update_status,name='recycle-request-update-status'),
 ]
 

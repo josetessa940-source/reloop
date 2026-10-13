@@ -1,0 +1,11 @@
+* [33m03ec2c7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtessa[m[33m)[m Add Offer API
+* [33me964083[m Add Review Rating API with star display
+[31m|[m *   [33m721e486[m[33m ([m[1;35mrefs/stash[m[33m)[m On tessa: Save local database and IDE changes
+[31m|[m [32m|[m[33m\[m  
+[31m|[m [32m|[m * [33mf663dec[m index on tessa: 57c2122 Add Offer API
+[31m|[m [32m|[m[32m/[m  
+[31m|[m * [33m57c2122[m[33m ([m[1;31morigin/tessa[m[33m)[m Add Offer API
+[31m|[m[31m/[m  
+* [33m8de29a9[m Add Wishlist API
+* [33m3c5a983[m Complete Product API
+* [33mda41df7[m Complete Seller Verification API

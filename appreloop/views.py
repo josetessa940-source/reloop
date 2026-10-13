@@ -796,3 +796,67 @@ def repair_request_status_update(request, pk):
 
     serializer = RepairRequestSerializer(repair)
     return Response(serializer.data)
+
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def recycle_request_list_create(request):
+
+    if request.method == 'GET':
+        recycle_requests = RecycleRequest.objects.filter(
+            user=request.user
+        ).order_by('-created_at')
+
+        serializer = RecycleRequestSerializer(
+            recycle_requests,
+            many=True
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    item_description = request.data.get('item_description', '').strip()
+
+    if not item_description:
+        return Response(
+            {'error': 'Item description is required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    recycle_request = RecycleRequest.objects.create(
+        user=request.user,
+        item_description=item_description
+    )
+
+    serializer = RecycleRequestSerializer(recycle_request)
+
+    return Response(
+        serializer.data,
+        status=status.HTTP_201_CREATED
+    )
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAdminUser])
+def recycle_request_update_status(request, pk):
+
+    recycle_request = get_object_or_404(RecycleRequest, pk=pk)
+
+    new_status = request.data.get('status')
+
+    allowed_statuses = ['Pending', 'Approved', 'Rejected', 'Completed']
+
+    if new_status not in allowed_statuses:
+        return Response(
+            {
+                'error': 'Invalid status.',
+                'allowed_statuses': allowed_statuses
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    recycle_request.status = new_status
+    recycle_request.save()
+
+    serializer = RecycleRequestSerializer(recycle_request)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)

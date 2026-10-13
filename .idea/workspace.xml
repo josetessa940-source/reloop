@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="fe952031-1b9e-44b2-bcaf-cfac788b3354" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/appreloop/migrations/0018_exchangerequest_repairrequest.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/migrations/0018_exchangerequest_repairrequest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/appreloop/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/appreloop/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/appreloop/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/appreloop/urls.py" afterDir="false" />
@@ -41,7 +42,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Rebasing tessa&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;tessa&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/joset/OneDrive/Desktop/reloop/proreloop&quot;
   }
 }</component>

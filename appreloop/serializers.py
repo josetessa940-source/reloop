@@ -429,3 +429,28 @@ class RepairRequestSerializer(serializers.ModelSerializer):
                 "Issue description cannot be empty."
             )
         return value
+
+
+
+class RecycleRequestSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = RecycleRequest
+        fields = [
+            'id',
+            'user',
+            'username',
+            'item_description',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'user',
+            'username',
+            'status',
+            'created_at',
+            'updated_at',
+        ]
