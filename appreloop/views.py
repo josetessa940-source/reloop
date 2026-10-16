@@ -1,9 +1,6 @@
-
 from decimal import Decimal, InvalidOperation
-
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
@@ -11,10 +8,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import (DonationRequest,RepairRequest,Pickup,Order,Product,)
-from .serializers import (DonationRequestSerializer,RepairRequestSerializer,PickupSerializer,)
+from .models import DonationRequest,RepairRequest,Pickup,Order,Product
+from .serializers import DonationRequestSerializer,RepairRequestSerializer,PickupSerializer
 from .models import *
 from .serializers import *
+from rest_framework.authentication import TokenAuthentication
 
 
 class RegisterAPI(generics.CreateAPIView):
@@ -96,13 +94,13 @@ class MyProfileAPI(generics.RetrieveUpdateAPIView):
 class CategoryListCreateAPI(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
 
 class CategoryDetailAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
 class CreateSellerAPI(generics.CreateAPIView):
     serializer_class = SellerSerializer
@@ -176,14 +174,13 @@ class SellerVerificationDetailAPI(generics.UpdateAPIView):
 class ProductListCreateAPI(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
 
 class ProductDetailAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [AllowAny]
-
+    permission_classes = [IsAuthenticated]
 
 # Add product to wishlist
 class WishlistCreateView(generics.CreateAPIView):
@@ -215,9 +212,7 @@ class ReviewListCreateAPI(generics.ListCreateAPIView):
         ) if self.request.query_params.get('product') else Review.objects.all()
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]
-        return [AllowAny()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
